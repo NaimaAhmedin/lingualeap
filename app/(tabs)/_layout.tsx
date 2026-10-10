@@ -1,70 +1,137 @@
-import { SymbolView } from 'expo-symbols';
-import { Link, Tabs } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
+import React from 'react';
+import { Tabs, Redirect } from 'expo-router';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { useApp } from '../../src/context/AppContext';
+import { AGE_GROUP_CONFIGS } from '../../src/constants/theme';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+function TabIcon({ icon, label, focused, color }: { icon: string; label: string; focused: boolean; color: string }) {
+  return (
+    <View style={styles.tabIconContainer}>
+      <View style={[styles.tabIconWrapper, focused && { backgroundColor: color + '20' }]}>
+        <Text style={[styles.tabIcon, focused && styles.tabIconActive]}>{icon}</Text>
+      </View>
+      <Text style={[styles.tabLabel, focused && { color, fontWeight: '700' }]}>{label}</Text>
+    </View>
+  );
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { profile, isLoading } = useApp();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingEmoji}>🌍</Text>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!profile) {
+    return <Redirect href="/onboarding" />;
+  }
+
+  const themeColor = AGE_GROUP_CONFIGS[profile.ageGroup].colors.primary;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#0A0E27',
+          borderTopColor: '#1A1E3C',
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 88 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+          paddingTop: 8,
+          elevation: 0,
+        },
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: themeColor,
+        tabBarInactiveTintColor: '#636E72',
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
-          ),
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable style={{ marginRight: 15 }}>
-                {({ pressed }) => (
-                  <SymbolView
-                    name={{ ios: 'info.circle', android: 'info', web: 'info' }}
-                    size={25}
-                    tintColor={Colors[colorScheme].text}
-                    style={{ opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="🏠" label="Home" focused={focused} color={themeColor} />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="lessons"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="📚" label="Learn" focused={focused} color={themeColor} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="speak"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="🗣️" label="Speak" focused={focused} color={themeColor} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="📊" label="Progress" focused={focused} color={themeColor} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="👤" label="Profile" focused={focused} color={themeColor} />
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0A0E27',
+  },
+  loadingEmoji: {
+    fontSize: 60,
+    marginBottom: 16,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#8B8FA3',
+  },
+  tabIconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabIconWrapper: {
+    width: 40,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  tabIcon: {
+    fontSize: 20,
+    opacity: 0.6,
+  },
+  tabIconActive: {
+    opacity: 1,
+  },
+  tabLabel: {
+    fontSize: 11,
+    color: '#636E72',
+    fontWeight: '500',
+  },
+});

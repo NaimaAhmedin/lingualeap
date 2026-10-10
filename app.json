@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "LinguaLeap",
+    "slug": "lingualeap",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "app",
+    "scheme": "lingualeap",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
